@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ufwb version="1.9">
+    <grammar name="SPLICE grammar" start="id:3" author="Matthew Rothenberg" fileextension="splice">
+        <description>Grammar for SPLICE files</description>
+        <scripts>
+            <script name="Test" type="ProcessResults" id="23">
+                <description>Test splice</description>
+                <source language="Python">def init():
+	print &quot;hello init&quot;
+
+def processResult(result):
+	print &quot;hello result&quot;
+
+  	resultType = result.getType()
+
+	if resultType == RESULT_STRUCTURE_START_TYPE:
+		print(&quot;Structure Start&quot;)
+	else:
+		print(&quot;other&quot;)
+
+	level = result.getLevel()
+ 	print (level)
+
+	name = result.getName()
+
+	value = result.getValue()
+
+	if( value != None ):
+		type = value.getType()
+		if type == VALUE_BINARY:
+			startPos = result.getStartBytePos()
+			length = result.getByteLength()
+			byteView = result.getByteView()
+			for x in range(length):
+				byte = byteView.readByte(startPos + x)
+			print &quot;Binary&quot;
+		elif type == VALUE_NUMBER_UNSIGNED:
+			print &quot;Unsigned: &quot; + str(value.getUnsigned())
+		elif type == VALUE_NUMBER_SIGNED:
+			print &quot;Signed: &quot; + str(value.getSigned())
+		elif type == VALUE_NUMBER_FLOAT:
+			print &quot;Float: &quot; + str(value.getFloat())
+		elif type == VALUE_STRING:
+			print &quot;String: &quot; + value.getString()
+
+	print result.getStringRepresentation()
+
+def terminate():
+	print &quot;hello terminate&quot;
+</source>
+            </script>
+        </scripts>
+        <structure name="SPLICE file" id="3" encoding="ISO_8859-1:1987" endian="little" signed="no">
+            <structure name="Header" id="4">
+                <string name="formatID" mustmatch="yes" id="5" fillcolor="521B92" type="fixed-length" length="6" encoding="ISO_8859-1:1987">
+                    <fixedvalues>
+                        <fixedvalue name="id" value="SPLICE"/>
+                    </fixedvalues>
+                </string>
+                <number name="LENGTH" id="6" fillcolor="FF2600" type="integer" length="64" lengthunit="bit" endian="big"/>
+            </structure>
+            <structure name="Body" id="8" length="LENGTH">
+                <string name="version" id="9" fillcolor="FFCF90" type="fixed-length" length="32" encoding="ISO_8859-1:1987"/>
+                <number name="tempo" id="10" fillcolor="FF2F92" type="float" length="32" lengthunit="bit"/>
+                <structure name="Track" id="11" length="0" repeatmax="-1">
+                    <number name="track_num" id="12" fillcolor="008F51" type="integer" length="1"/>
+                    <binary name="&lt;padding?&gt;" id="13" fillcolor="424242" length="3"/>
+                    <number name="ILEN" id="14" fillcolor="929000" type="integer" length="1"/>
+                    <string name="instrument" id="15" fillcolor="FEFB00" type="fixed-length" length="ILEN" encoding="ISO_8859-1:1987"/>
+                    <structure name="Beats" id="16">
+                        <binary name="beat" id="17" fillcolor="75D5FF" repeatmin="16" repeatmax="16" length="1"/>
+                    </structure>
+                </structure>
+            </structure>
+        </structure>
+    </grammar>
+</ufwb>
