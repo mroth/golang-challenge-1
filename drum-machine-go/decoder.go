@@ -31,7 +31,7 @@ func DecodeFile(path string) (*Pattern, error) {
 	}
 
 	// read preamble, which gives us basic pattern metadata
-	p, err = readPreamble(f)
+	p, err = extractPreamble(f)
 	if err != nil {
 		return p, err
 	}
@@ -82,7 +82,7 @@ func verifyHeader(f io.Reader) (expectedBytes uint64, err error) {
 }
 
 /*
-	Reads the "preamble" to a splice file body, which contains general metadata
+	Extracts the "preamble" to a splice file body, which contains general metadata
 	about the overall song.
 
 	The preamble consists of the following binary structure:
@@ -92,13 +92,13 @@ func verifyHeader(f io.Reader) (expectedBytes uint64, err error) {
 		| version |    32 | []byte  | null padded to length     |
 		| tempo   |     4 | float32 | *little endian encoding!* |
 
-	As such, readPreamble will consume exactly 36 bytes off the buffer reader.
+	As such, extractPreamble will consume exactly 36 bytes off the buffer reader.
 
 	Returns initialized Pattern struct with all the metadata and an empty track
 	array, ready to be populated. Returns an error if parsing failed for any
 	reason.
 */
-func readPreamble(f io.Reader) (*Pattern, error) {
+func extractPreamble(f io.Reader) (*Pattern, error) {
 	preamble := struct {
 		VersionStr [32]byte
 		Tempo      float32
@@ -115,7 +115,7 @@ func readPreamble(f io.Reader) (*Pattern, error) {
 }
 
 /*
-	Extracts all tracks contained in the remainder of file body.
+	Extracts all tracks contained in the remainder of content body.
 
 	Should not try to extract beyond the remaining number of expected bytes
 	reported in the file header (which needs to be passed to this function).
