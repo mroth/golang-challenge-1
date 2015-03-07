@@ -25,10 +25,10 @@ defmodule Decoder do
   taking into account the reported content-length defined in the header.
   """
   @spec parse_header(bitstring) :: bitstring
-  defp parse_header( << "SPLICE", body_length :: 64, rest :: binary >> ) do
-    << body :: binary-size(body_length), _ :: binary >> = rest
-    body
-  end
+  defp parse_header( << "SPLICE",
+                        content_length :: integer-size(64),
+                        contents :: binary-size(content_length),
+                        _ :: binary >> ), do: contents
 
   @doc """
   Parse the "preamble" to a splice file body, which contains general metadata
