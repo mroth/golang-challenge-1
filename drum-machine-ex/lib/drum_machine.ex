@@ -1,9 +1,17 @@
 defmodule Pattern do
+  @moduledoc """
+  Pattern is the high level representation of the drum pattern contained in
+  a .splice file.
+  """
   defstruct version: "", tempo: 0, tracks: []
   @type t :: %Pattern{version: String.t, tempo: float, tracks: [Track.t]}
 end
 
 defmodule Track do
+  @moduledoc """
+  Track is the high level representation of a single instrument within a
+  .splice file Pattern.
+  """
   defstruct id: 0, instrument: nil, beats: []
   @type t :: %Track{id: integer, instrument: String.t, beats: [boolean]}
 end

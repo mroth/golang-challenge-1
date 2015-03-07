@@ -35,9 +35,7 @@ func (p *Pattern) tempoString() string {
 }
 
 // Track is the high level representation of a single instrument within a
-// a .splice file Pattern.
-//
-// It represents timing information.
+// .splice file Pattern.
 type Track struct {
 	ID    uint8
 	Name  string   // the name of the instrument, or "sample"
