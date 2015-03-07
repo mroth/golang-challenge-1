@@ -73,3 +73,9 @@ Tempo: 999
 		}
 	}
 }
+
+func BenchmarkDecodeFile(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		DecodeFile(path.Join("fixtures", "pattern_1.splice"))
+	}
+}
