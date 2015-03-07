@@ -20,11 +20,16 @@ defimpl String.Chars, for: Pattern do
   def to_string(%Pattern{} = p) do
     """
     Saved with HW Version: #{p.version}
-    Tempo: #{p.tempo}
+    Tempo: #{format_float(p.tempo)}
     """ <>
     (Enum.map(p.tracks, &String.Chars.Track.to_string/1)
       |> Enum.reverse |> Enum.join("\n")
     )
+  end
+
+  def format_float(f) do
+    short = Float.to_string(f, [decimals: 1, compact: true])
+    String.replace(short, ".0", "")
   end
 end
 
