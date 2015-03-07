@@ -1,19 +1,23 @@
 defmodule Decoder do
 
-  def decode(file_name) do
-    case File.read(file_name) do
+  @doc """
+  Decodes the drum machine file found at the provided path and returns a
+  parsed pattern which is the entry point to the rest of the data.
+  """
+  @spec decode(String.t) :: Pattern.t
+  def decode(file_path) do
+    case File.read(file_path) do
       {:ok, file} ->
         parse(file)
       _ ->
-        IO.puts "Couldn't open #{file_name}"
+        IO.puts "Couldn't open #{file_path}"
     end
   end
 
+  @spec parse(bitstring) :: Pattern.t
   def parse(file) do
-    file
-    |> parse_header
-    |> parse_preamble
-    |> parse_tracks
+    {rest, p} = file |> parse_header |> parse_preamble
+    %{p | tracks: parse_tracks(rest)}
   end
 
   @doc """
@@ -30,8 +34,8 @@ defmodule Decoder do
   Parse the "preamble" to a splice file body, which contains general metadata
 	about the overall song.
 
-  Returns initialized Pattern struct with all the metadata and an empty track
-	list (ready to be populated!), as well as the remainder of the content body.
+  Returns initialized Pattern struct with all the metadata (and an empty track
+	list placeholder), as well as the remainder of the content body.
   """
   @spec parse_preamble(bitstring) :: {bitstring, Pattern.t}
   defp parse_preamble(contents) do
@@ -42,13 +46,12 @@ defmodule Decoder do
   end
 
   @doc """
-  Parses all tracks contained in the remainder of the content body.
-
-  Takes as secondary element an initialized Pattern as template, it will then
-  fully populate its Tracks field with the parsed tracks, and returns a copy.
+  Recursively parse all tracks contained in the remainder of the content body.
   """
-  @spec parse_tracks({bitstring, Pattern.t}) :: Pattern.t
-  defp parse_tracks({contents, results}) when bit_size(contents) > 0 do
+  @spec parse_tracks(bitstring, [Track.t]) :: [Track.t]
+  defp parse_tracks(contents, tracks \\ [])
+  defp parse_tracks(<<>>, tracks), do: tracks
+  defp parse_tracks(contents, tracks) when bit_size(contents) > 0 do
     << track_id   :: integer-size(8),
        _padding   :: binary-size(3),
        i_len      :: integer-size(8),
@@ -57,10 +60,10 @@ defmodule Decoder do
        remainder  :: binary             >> = contents
 
     # convert beat grid to local format
-    beatlist = for <<i <- beats>>, do: i != 0
+    beats = for <<i <- beats>>, do: i != 0
 
-    track = %Track{id: track_id, instrument: instrument, beats: beatlist}
-    parse_tracks {remainder, %{results | tracks: [track | results.tracks]}}
+    track = %Track{id: track_id, instrument: instrument, beats: beats}
+    parse_tracks(remainder, [track | tracks])
   end
-  defp parse_tracks({_, results}), do: results
+
 end
