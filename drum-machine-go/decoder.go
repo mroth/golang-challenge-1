@@ -3,7 +3,6 @@ package drum
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -15,38 +14,35 @@ import (
 //
 // Returns a descriptive error if the procedure fails at any point.
 func DecodeFile(path string) (*Pattern, error) {
-	p := &Pattern{}
-
-	// open file
 	f, err := os.Open(path)
-	if err != nil {
-		return p, err
-	}
 	defer f.Close()
+	if err != nil {
+		return nil, err
+	}
 
-	// verify header
+	return decode(f)
+}
+
+func decode(f io.Reader) (*Pattern, error) {
+	// verify header, which gives us the expected length of content-body
 	expectedBytes, err := verifyHeader(f)
 	if err != nil {
-		return p, err
+		return nil, err
 	}
-
 	// read preamble, which gives us basic pattern metadata
-	p, err = extractPreamble(f)
+	p, err := extractPreamble(f)
 	if err != nil {
 		return p, err
 	}
-
-	// extract all tracks
+	// extract all tracks, bearing in mind expected EOD
 	remainingBytes := expectedBytes - 36
 	p.Tracks, err = extractTracks(f, remainingBytes)
-
-	fmt.Printf("%#v", p)
 
 	return p, err
 }
 
 /*
-	Reads the fie header to verify this is a Splice file, and extracts file
+	Reads the file header to verify this is a Splice file, and extracts file
 	metadata such as version of Splice that created the file.
 
 	Will return an error if the file headers could not be verified as a
