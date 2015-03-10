@@ -1,4 +1,0 @@
-DrumMachine
-===========
-
-** TODO: Add description **
