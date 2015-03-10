@@ -1,5 +1,7 @@
-// Package drum is supposed to implement the decoding of .splice drum machine files.
+// Package drum implements the decoding of .splice drum machine files.
 // See golang-challenge.com/go-challenge1/ for more information
+//
+// This implementation submitted by Matthew Rothenberg <http://github.com/mroth>
 package drum
 
 import (
